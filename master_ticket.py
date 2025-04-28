@@ -1,64 +1,70 @@
-TICKET_PRICE = 10
-tickets_remaining = 100
-SERVICE_CHARGE = 2
+TICKET_PRICE = 10  # dollars, constants are always in capital letters
+SERVICE_CHARGE = 2  # dollars, only applied once per purchase, not per ticket
+tickets_remaining = 100  # variables are always in snake_case
 
-while True:
-    # Prompt the user for their name and format it properly
-    username = input("Enter your username: ").title()
-    print(f"Hello {username}, we are delighted that you are interested in one of our events!\n"
-          f"Just to let you know, there are {tickets_remaining} ticket(s) remaining.")
-    
-    # Inform users that tickets are sold out and prevent them from making purchases
+
+def welcome_customer():  # no parameters needed
+    username = input("Enter your username: ").strip()  # strip nice for
+    # removing accidental whitespace
+    print(f"Hello {username}, we are delighted"  # printing on seperate lines
+          # to keep within pep8 guidelines
+          "that you are interested in "  # continution lines must
+          #  be aligned with parens
+          "purchasing tickets for one of our events!\n"
+          "Just to let you know, there are"  # no need for f string
+          f"{tickets_remaining} ticket(s) remaining.")
     if tickets_remaining <= 0:
-        print(f"Sorry {username}, we have sold out of all tickets! We hope to see you next time.")
-        continue  # Allow another user to try
+        return (f"Sorry {username}, as you can see, "  # again lining up
+                # continuation lines with parens
+                f"we have sold out all of our tickets for this event!")
+    else:
+        return username
 
-    # Check if the user is interested in purchasing tickets
-    while True:
-        interested = input("Would you like to purchase any tickets? (y/n): ").lower()
-        if interested not in ["y", "n"]:
-            print("Please enter 'y' or 'n' only!")
-            continue
-        break  # Valid response received, exit loop
 
-    if interested != "y":
+def validate_purchase(username: str):  # grab username from welcome_customer
+    interested_purchasing = (input("Would you like to "
+                                   "purchase any tickets?"
+                                   "(y/n): ")).lower().strip()
+    if interested_purchasing not in ["y", "n"]:
+        print("Please enter 'y' or 'n' only!")
+        return
+    num_tickets = int(input("How many tickets would you like to purchase,"
+                            f"{username}?: ")).strip()
+    if num_tickets <= 0:
+        raise ValueError("You cannot purchase 0 tickets!")
+    if num_tickets > tickets_remaining:
+        raise ValueError("You cannot purchase more tickets"
+                         "than we have available!")
+    else:
+        return num_tickets
+
+
+def calc_tickets(num_tickets: int):
+    return (num_tickets * TICKET_PRICE) + SERVICE_CHARGE
+
+
+def confirm_purchase(username: str, num_tickets: int):
+    confirmation_ans = input(
+            f"{username}, are you sure that you want to purchase"
+            f"{total_cost} dollars worth of tickets?\n"
+            f"This is {num_tickets} ticket(s). It includes a"
+            f"{SERVICE_CHARGE} dollar service charge.\n(y/n): "
+        ).lower()
+
+    if confirmation_ans not in ["y", "n"]:
+        print("Please enter 'y' or 'n' only!")
+    elif confirmation_ans == "n":
         print(f"Have a great day, {username}!")
-        continue  # Restart the process for a new user
+    else:
+        print(f"Congratulations {username}!\n"
+              f"You now own {num_tickets} ticket(s).\n"
+              "Have a great time at the event(s)!")
+        tickets_remaining -= num_tickets
 
-    # Define a function to validate the number of tickets the user wants to purchase
-    def valid_purchase(number, too_many_tickets):
-        if number <= 0:
-            raise ValueError("You cannot purchase 0 tickets!")  # Raise an error for invalid input
-        if number > too_many_tickets:
-            raise ValueError("You cannot purchase more tickets than are available!")
 
-    # Define a function to calculate the total ticket cost, including the service charge
-    def calc_tickets(number):
-        return (number * TICKET_PRICE) + SERVICE_CHARGE
+def main():
+    total_cost = calc_tickets(num_tickets)
 
-    while True:
-        try:
-            # Prompt the user to specify the number of tickets they wish to purchase
-            num_tickets = int(input(f"How many tickets would you like to purchase, {username}?: "))
-            valid_purchase(num_tickets, tickets_remaining)  # Validate the user's input
-        except ValueError as err:
-            print(err)  # Display an error message if the input is invalid
-            continue
-        total_cost = calc_tickets(num_tickets)  # Calculate the total cost of the tickets
-        break  # Exit the loop once the input is valid
 
-    while True:
-        # Ask the user to confirm their purchase
-        confirmation = input(f"{username}, are you sure that you want to purchase {total_cost} dollars worth of tickets?\n"
-                            f"This is {num_tickets} ticket(s). It includes a {SERVICE_CHARGE} dollar service charge.\n(y/n): ").lower()
-
-        if confirmation not in ["y", "n"]:
-            print("Please enter 'y' or 'n' only!")
-            continue
-        elif confirmation == "n":
-            print(f"Have a great day, {username}!")
-            continue  # Restart the process for a new user
-        else:
-            # Complete the purchase, congratulate the user, and update the ticket count
-            print(f"Congratulations {username}!\nYou now own {num_tickets} ticket(s).\nHave a great time at the event(s)!")
-            tickets_remaining -= num_tickets  # Deduct the purchased tickets from the available count
+if __name__ == "__main__":
+    main()
